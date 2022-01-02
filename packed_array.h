@@ -48,28 +48,4 @@ void packed_array_alloc(void **array, size_t size) {
         dyn_array_get_size((array)->elements) -= sizeof((array)->elements[0]);\
     } while(0);
 
-int main() {
-    packed_array(int) a = NULL;
-    packed_array_init(a, sizeof(int));
-    packed_array_add(a, 10);
-    packed_array_add(a, 312);
-    packed_array_add(a, 12);
-    packed_array_add(a, 38);
-    packed_array_add(a, 45);
-    packed_array_add(a, 33);
-    packed_array_add(a, 96);
-    packed_array_add(a, 70);
-    packed_array_erase(a, 3);
-    packed_array_erase(a, 4);
-    packed_array_erase(a, 0);
-    printf("count is %d\n", dyn_array_get_count(a->elements));
-    for (int i = 0; i < dyn_array_get_count(a->indices); i++) printf("%d ", packed_array_get(a, i));
-    printf("\n");
-    for (int i = 0; i < dyn_array_get_count(a->elements); i++) printf("%d ", a->elements[i]);
-    printf("\n");
-    for (int i = 0; i < dyn_array_get_count(a->indices); i++) a->indices[i] != 0xFFFFFFFF ? printf("%d ", a->indices[i]) : printf("");
-    printf("\n");
-    printf("element with id is %d and is at index %d\n", packed_array_get(a, 7),packed_array_get_idx(a, 7));
-
-};
 #endif

@@ -4,19 +4,26 @@
 //https://github.com/truta193/dynamic-array/blob/main/dynamic_array.h
 #include "dynamic_array.h"
 
-#define packed_array(type)\
+#define PA_INVALID_ID 0xFFFFFFFF
+#define PA_INVALID_INDEX 0xFFFFFFFF
+
+#define am_packed_array(type)\
     struct {\
-        dyn_array(unsigned int) indices;\
+        dyn_array(am_uint32) indices;\
         dyn_array(type) elements;\
         unsigned int next_id;\
     }*
 
-#define packed_array_get_idx(array, id)         ((id) < (array)->next_id ? (array)->indices[(id)] : 0xFFFFFFFF)
-#define packed_array_get(array, id)             (((id) < (array)->next_id) && ((array)->indices[(id)] != 0xFFFFFFFF) ? (array)->elements[(array)->indices[(id)]] : 0)
-#define packed_array_has(array, id)             (((id) < (array)->next_id) && (packed_array_get_idx((array), (id)) != 0xFFFFFFFF) ? 1 : 0)
-#define packed_array_init(array, value_size)    (packed_array_alloc((void**)&(array), sizeof(*(array))), dyn_array_init((void**)&((array)->indices), sizeof(unsigned int)), dyn_array_init((void**)&((array)->elements), (value_size)))
-#define packed_array_clear(array)               (dyn_array_clear((array)->indices), dyn_array_clear((array)->elements), free((void*)(array)))
-#define packed_array_add(array, value)          (dyn_array_push((array)->indices, dyn_array_get_count((array)->indices)), dyn_array_push((array)->elements, value), (array)->next_id++)
+#define packed_array_get_idx(array, id) ((id) < (array)->next_id ? (array)->indices[(id)] : PA_INVALID_INDEX)
+//TODO: Some kind of guard for get_val needed
+#define packed_array_get_val(array, id) ((array)->elements[(array)->indices[(id)]])
+#define packed_array_get_ptr(array, id) (((id) < (array)->next_id) && ((array)->indices[(id)] != PA_INVALID_INDEX) ? &((array)->elements[(array)->indices[(id)]]) : NULL)
+#define packed_array_get_count(array) (dyn_array_get_count((array)->elements))
+#define packed_array_has(array, id) (((id) < (array)->next_id) && (packed_array_get_idx((array), (id)) != PA_INVALID_INDEX) ? 1 : 0)
+#define packed_array_init(array, value_size) (packed_array_alloc((void**)&(array), sizeof(*(array))), (array)->next_id = 1, dyn_array_init((void**)&((array)->indices), sizeof(unsigned int)*2), dyn_array_get_header((array)->indices)->size += sizeof(unsigned int), dyn_array_init((void**)&((array)->elements), (value_size)))
+#define packed_array_clear(array) (dyn_array_clear((array)->indices), dyn_array_clear((array)->elements))
+#define packed_array_destroy(array) (dyn_array_destroy((array)->indices), dyn_array_destroy((array)->elements), free(array))
+#define packed_array_add(array, value) (dyn_array_push((array)->indices, dyn_array_get_count((array)->indices)-1), dyn_array_push((array)->elements, value), (array)->next_id++)
 
 void packed_array_alloc(void **array, size_t size) {
     if (*array == NULL) {
